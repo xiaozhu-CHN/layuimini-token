@@ -1,76 +1,175 @@
-layuimini后台模板
+layuimini集成jwt实现token
 ===============
-# 项目介绍
-最简洁、清爽、易用的layui后台框架模板。
+### 一.配置
+编辑index.html,150行，启用token和输入登录页地址。
+```javascript
+	var options = {
+            iniUrl: "api/init.json",    // 初始化接口
+            clearUrl: "api/clear.json", // 缓存清理接口
+            urlHashLocation: true,      // 是否打开hash定位
+            bgColorDefault: false,      // 主题默认配置
+            multiModule: true,          // 是否开启多模块
+            menuChildOpen: false,       // 是否默认展开菜单
+            loadingTime: 0,             // 初始化加载时间
+            pageAnim: true,             // iframe窗口动画
+            maxTabNum: 20,              // 最大的tab打开数量
+			token: true,				// 是否启用token
+			login: "page/login-1.html", //登录页面
+        };
+```
 
-项目会不定时进行更新，建议star和watch一份。
+### 二.使用
+1. 引入js。
+```javascript
+//不要忘记引用第二个
+<script src="lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+```
 
-技术交流QQ群：[1165301500](https://jq.qq.com/?_wv=1027&k=eUm5xKG1)、[667813249🈵](https://jq.qq.com/?_wv=1027&k=5lyiE2Q)、[561838086🈵](https://jq.qq.com/?_wv=1027&k=5JRGVfe) `加群请备注来源：如gitee、github、官网等`。
+2. layui引入jwt模块。
+正常引用：
+```javascript
+layui.use(["jwt"], function () {
+	 var jwt = layui.jwt;
+});
+```
+如果已经引入了"miniTab"或者"miniAdmin"，直接var使用即可，无需引入，案例：
+```javascript
+layui.use(['jquery', 'layer', 'miniAdmin'], function () {
+	var $ = layui.jquery,
+		layer = layui.layer,
+		miniAdmin = layui.miniAdmin,
+		jwt = layui.jwt;
+});
+```
 
-# 主要特性
-* 界面足够简洁清爽，响应式且适配手机端。
-* 一个接口`几行代码而已`直接初始化整个框架，无需复杂操作。
-* 页面支持多配色方案，可自行选择喜欢的配色。
-* 支持多tab，可以打开多窗口。
-* 支持无限级菜单和对font-awesome图标库的完美支持。
-* 失效以及报错菜单无法直接打开，并给出弹出层提示`完美的线上用户体验`。
-* url地址hash定位，可以清楚看到当前tab的地址信息。
-* 刷新页面会保留当前的窗口，并且会定位当前窗口对应左侧菜单栏。
-* 支持font-awesome图标选择插件
+### 三.jwt方法
+#### 1.decode()
+##### 简要描述
+- 解析jwt的有效载荷
 
+##### 参数
+无需参数
 
-# 代码仓库(iframe 多tab版)
+##### 返回值
+返回一个对象。根据你设定的PAYLOAD有啥对象就有啥。
 
-### v2版
- * 在线预览地址：[http://layuimini.99php.cn/iframe/v2/index.html](http://layuimini.99php.cn/iframe/v2/index.html)
- * GitHub仓库地址：[https://github.com/zhongshaofa/layuimini/tree/v2](https://github.com/zhongshaofa/layuimini/tree/v2)
- * Gitee仓库地址：[https://gitee.com/zhongshaofa/layuimini/tree/v2](https://gitee.com/zhongshaofa/layuimini/tree/v2)
-### v1版
-  * 在线预览地址：[http://layuimini.99php.cn/iframe/v1/index.html](http://layuimini.99php.cn/iframe/v1/index.html)
-  * GitHub仓库地址：[https://github.com/zhongshaofa/layuimini/tree/master](https://github.com/zhongshaofa/layuimini/tree/master)
-  * Gitee仓库地址：[https://gitee.com/zhongshaofa/layuimini/tree/master](https://gitee.com/zhongshaofa/layuimini/tree/master)
- 
-# 代码仓库(onepage 单页版)
+##### 案例
+``` 
+{
+	"sub": "1234567890",
+	"name": "John Doe",
+	"iat": 1516239022,
+	"exp": 1710553586
+}
+```
 
-### v2版
- * 在线预览地址：[http://layuimini.99php.cn/onepage/v2/index.html](http://layuimini.99php.cn/onepage/v2/index.html)
- * GitHub仓库地址：[https://github.com/zhongshaofa/layuimini/tree/v2-onepage](https://github.com/zhongshaofa/layuimini/tree/v2-onepage)
- * Gitee仓库地址：[https://gitee.com/zhongshaofa/layuimini/tree/v2-onepage](https://gitee.com/zhongshaofa/layuimini/tree/v2-onepage)
- 
-### v1版
- * 在线预览地址：[http://layuimini.99php.cn/onepage/v1/index.html](http://layuimini.99php.cn/onepage/v1/index.html)
- * GitHub仓库地址：[https://github.com/zhongshaofa/layuimini/tree/onepage](https://github.com/zhongshaofa/layuimini/tree/onepage)
- * Gitee仓库地址：[https://gitee.com/zhongshaofa/layuimini/tree/onepage](https://gitee.com/zhongshaofa/layuimini/tree/onepage)
+#### 2.isState()
+##### 简要描述
+- 判断当前token是否有效
 
-# 下载方式
+##### 参数
+无需参数
 
-### iframe v2版
- * GitHub下载命令：`git clone https://github.com/zhongshaofa/layuimini -b v2`
- * Gitee下载命令：`git clone https://gitee.com/zhongshaofa/layuimini -b v2`
-### iframe v1版
- * GitHub下载命令：`git clone https://github.com/zhongshaofa/layuimini -b master`
- * Gitee下载命令：`git clone https://gitee.com/zhongshaofa/layuimini -b master`
-### 单页版 v2版
- * GitHub下载命令：`git clone https://github.com/zhongshaofa/layuimini -b v2-onepage`
- * Gitee下载命令：`git clone https://gitee.com/zhongshaofa/layuimini -b v2-onepage`
-### 单页版 v1版
- * GitHub下载命令：`git clone https://github.com/zhongshaofa/layuimini -b onepage`
- * Gitee下载命令：`git clone https://gitee.com/zhongshaofa/layuimini -b onepage`
-### 发行版地址
-* GitHub发版地址：[https://github.com/zhongshaofa/layuimini/releases](https://github.com/zhongshaofa/layuimini/releases)
-* Gitee发版地址：[https://gitee.com/zhongshaofa/layuimini/releases](https://gitee.com/zhongshaofa/layuimini/releases)
- 
-# 效果预览
-> 总体预览
+##### 返回值
+true或者false。
 
-![Image text](./images/home.png)
+|类型|返回值|
+|:----    |:---|
+|token为空 |false |
+|当前时间大于token的到期时间 |false  |
+|token不为空且当前时间小于token的到期时间    |true  |
 
-# 使用说明
+#### 3.isStateHref()
+#### 简要描述
+- 判断当前token是否有效 失效的话跳转登录页面
 
-文档地址：[查看文档](http://layuimini.99php.cn/docs/)
+##### 参数
+无需参数
 
- # 捐赠支持
- 
-开源项目不易，若此项目能得到你的青睐，可以捐赠支持作者持续开发与维护，感谢所有支持开源的朋友。
+##### 返回值
+true或者直接跳转登录页面
 
- ![Image text](https://chung-common.oss-cn-beijing.aliyuncs.com/donate_qrcode.png)
+|类型|返回值|
+|:----    |:---|
+|token为空 |直接跳转登录页面 |
+|当前时间大于token的到期时间 |直接跳转登录页面  |
+|token不为空且当前时间小于token的到期时间    |true  |
+
+#### 4.getToken()
+#### 简要描述
+- 获取token
+
+##### 参数
+无需参数
+
+##### 返回值
+无返回值
+
+#### 5.setToken(token)
+#### 简要描述
+- 保存token
+
+##### 参数
+token：保存的token
+
+##### 返回值
+无返回值
+
+#### 6.delToken()
+#### 简要描述
+- 删除token
+
+##### 参数
+无需参数
+
+##### 返回值
+无返回值
+
+### 四.案例
+#### 登录页面保存token。
+```javascript
+$.ajax({
+	url: login,
+	type: 'get',
+	success(data){
+		if (data != null) {
+			// 保存token
+			jwt.setToken(data);
+			layer.msg('登录成功', function () {
+				 window.location = '../index.html';
+			});
+		} else {
+			layer.msg('登录失败', {icon: 2, time: 1000});
+		}
+	},
+	error(err){
+		layer.msg('服务器错误', {icon: 2, time: 1000});
+	}
+});
+```
+
+#### Ajax请求带上token
+```javascript
+if(jwt.isStateHref()){
+	//如果token失效就自动登录页
+	$.ajax({
+		url: login,
+		type: 'get',
+		headers: {
+			'Authorization': jwt.getToken()
+		},
+		success(data){
+			if (data != null) {
+				// 数据处理
+			} else {
+				layer.msg('获取数据失败', {icon: 2, time: 1000});
+			}
+		},
+		error(err){
+			layer.msg('服务器错误', {icon: 2, time: 1000});
+		}
+	});
+}
+
+```

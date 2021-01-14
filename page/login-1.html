@@ -66,10 +66,12 @@
 </div>
 <script src="../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
 <script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
 <script src="../lib/jq-module/jquery.particleground.min.js" charset="utf-8"></script>
 <script>
-    layui.use(['form'], function () {
+    layui.use(['form','jwt'], function () {
         var form = layui.form,
+			jwt = layui.jwt,
             layer = layui.layer;
 
         // 登录过期的时候，跳出ifram框架
@@ -82,7 +84,7 @@
                 lineColor:'#7ec7fd'
             });
         });
-
+		
         // 进行登录操作
         form.on('submit(login)', function (data) {
             data = data.field;
@@ -99,6 +101,12 @@
                 return false;
             }
             layer.msg('登录成功', function () {
+				//开启token才给token
+				if(layui.data('jwt').istoken){
+					var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE3MTA1NTM1ODZ9.1GHEymwC2S3MALuaPJuwNJo3vFHwOO7Dx4Y3uZ_aoFo";
+					jwt.setToken(token);
+				}
+				//保存token的值
                 window.location = '../index.html';
             });
             return false;

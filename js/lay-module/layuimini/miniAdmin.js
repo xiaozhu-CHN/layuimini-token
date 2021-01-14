@@ -10,7 +10,8 @@ layui.define(["jquery", "miniMenu", "element","miniTab", "miniTheme"], function 
         miniMenu = layui.miniMenu,
         miniTheme = layui.miniTheme,
         element = layui.element ,
-        miniTab = layui.miniTab;
+        miniTab = layui.miniTab,
+		jwt = layui.jwt;
 
     if (!/http(s*):\/\//.test(location.href)) {
         var tips = "请先将项目部署至web容器（Apache/Tomcat/Nginx/IIS/等），否则部分数据将无法显示";
@@ -41,41 +42,104 @@ layui.define(["jquery", "miniMenu", "element","miniTab", "miniTheme"], function 
             options.loadingTime = options.loadingTime || 1;
             options.pageAnim = options.pageAnim || false;
             options.maxTabNum = options.maxTabNum || 20;
-            $.getJSON(options.iniUrl, function (data) {
-                if (data == null) {
-                    miniAdmin.error('暂无菜单信息')
-                } else {
-                    miniAdmin.renderLogo(data.logoInfo);
-                    miniAdmin.renderClear(options.clearUrl);
-                    miniAdmin.renderHome(data.homeInfo);
-                    miniAdmin.renderAnim(options.pageAnim);
-                    miniAdmin.listen();
-                    miniMenu.render({
-                        menuList: data.menuInfo,
-                        multiModule: options.multiModule,
-                        menuChildOpen: options.menuChildOpen
-                    });
-                    miniTab.render({
-                        filter: 'layuiminiTab',
-                        urlHashLocation: options.urlHashLocation,
-                        multiModule: options.multiModule,
-                        menuChildOpen: options.menuChildOpen,
-                        maxTabNum: options.maxTabNum,
-                        menuList: data.menuInfo,
-                        homeInfo: data.homeInfo,
-                        listenSwichCallback: function () {
-                            miniAdmin.renderDevice();
-                        }
-                    });
-                    miniTheme.render({
-                        bgColorDefault: options.bgColorDefault,
-                        listen: true,
-                    });
-                    miniAdmin.deleteLoader(options.loadingTime);
-                }
-            }).fail(function () {
-                miniAdmin.error('菜单接口有误');
-            });
+			options.token = options.token || false;
+			options.login = options.login || 'page/login-1.html';
+			//保存是否开启token
+			layui.data('jwt', {
+				key: 'istoken'
+				,value: options.token
+			});
+			if(options.token){
+				//保存login地址
+				layui.data('jwt', {
+					key: 'login'
+					,value: options.login
+				});
+				// 判断token是否有效
+				if(jwt.isStateHref(options.login)){
+					$.ajax({
+						url: options.iniUrl,
+						type: 'get',
+						headers: {
+							'Authorization': jwt.getToken()
+						},
+						success(data){
+							if (data == null) {
+								miniAdmin.error('暂无菜单信息')
+							} else {
+								miniAdmin.renderLogo(data.logoInfo);
+								miniAdmin.renderClear(options.clearUrl);
+								miniAdmin.renderHome(data.homeInfo);
+								miniAdmin.renderAnim(options.pageAnim);
+								miniAdmin.listen();
+								miniMenu.render({
+									menuList: data.menuInfo,
+									multiModule: options.multiModule,
+									menuChildOpen: options.menuChildOpen
+								});
+								miniTab.render({
+									filter: 'layuiminiTab',
+									urlHashLocation: options.urlHashLocation,
+									multiModule: options.multiModule,
+									menuChildOpen: options.menuChildOpen,
+									maxTabNum: options.maxTabNum,
+									menuList: data.menuInfo,
+									homeInfo: data.homeInfo,
+									listenSwichCallback: function () {
+										miniAdmin.renderDevice();
+									}
+								});
+								miniTheme.render({
+									bgColorDefault: options.bgColorDefault,
+									listen: true,
+								});
+								miniAdmin.deleteLoader(options.loadingTime);
+							}
+						},
+						error(err){
+							miniAdmin.error('菜单接口有误');
+						}
+					});
+				}
+			}else{
+				$.getJSON(options.iniUrl, function (data) {
+					if (data == null) {
+						miniAdmin.error('暂无菜单信息')
+					} else {
+						miniAdmin.renderLogo(data.logoInfo);
+						miniAdmin.renderClear(options.clearUrl);
+						miniAdmin.renderHome(data.homeInfo);
+						miniAdmin.renderAnim(options.pageAnim);
+						miniAdmin.listen();
+						miniMenu.render({
+							menuList: data.menuInfo,
+							multiModule: options.multiModule,
+							menuChildOpen: options.menuChildOpen
+						});
+						miniTab.render({
+							filter: 'layuiminiTab',
+							urlHashLocation: options.urlHashLocation,
+							multiModule: options.multiModule,
+							menuChildOpen: options.menuChildOpen,
+							maxTabNum: options.maxTabNum,
+							menuList: data.menuInfo,
+							homeInfo: data.homeInfo,
+							listenSwichCallback: function () {
+								miniAdmin.renderDevice();
+							}
+						});
+						miniTheme.render({
+							bgColorDefault: options.bgColorDefault,
+							listen: true,
+						});
+						miniAdmin.deleteLoader(options.loadingTime);
+					}
+				}).fail(function () {
+					miniAdmin.error('菜单接口有误');
+				});
+			}
+			
+            
         },
 
         /**

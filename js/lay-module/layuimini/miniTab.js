@@ -4,10 +4,11 @@
  * version:2.0
  * description:layuimini tab框架扩展
  */
-layui.define(["element", "layer", "jquery"], function (exports) {
+layui.define(["element", "layer", "jquery", "jwt"], function (exports) {
     var element = layui.element,
         layer = layui.layer,
-        $ = layui.$;
+        $ = layui.$,
+		jwt = layui.jwt;
 
 
     var miniTab = {
@@ -199,11 +200,13 @@ layui.define(["element", "layer", "jquery"], function (exports) {
         listen: function (options) {
             options = options || {};
             options.maxTabNum = options.maxTabNum || 20;
-
+			
             /**
              * 打开新窗口
              */
             $('body').on('click', '[layuimini-href]', function () {
+				//拦截请求验证token
+				jwt.isStateHref();
                 var loading = layer.load(0, {shade: false, time: 2 * 1000});
                 var tabId = $(this).attr('layuimini-href'),
                     href = $(this).attr('layuimini-href'),
@@ -242,6 +245,8 @@ layui.define(["element", "layer", "jquery"], function (exports) {
              * 在iframe子菜单上打开新窗口
              */
             $('body').on('click', '[layuimini-content-href]', function () {
+				//拦截请求验证token
+				jwt.isStateHref();
                 var loading = parent.layer.load(0, {shade: false, time: 2 * 1000});
                 var tabId = $(this).attr('layuimini-content-href'),
                     href = $(this).attr('layuimini-content-href'),
@@ -284,6 +289,8 @@ layui.define(["element", "layer", "jquery"], function (exports) {
              * 选项卡操作
              */
             $('body').on('click', '[layuimini-tab-close]', function () {
+				//拦截请求验证token
+				jwt.isStateHref();
                 var loading = layer.load(0, {shade: false, time: 2 * 1000});
                 var closeType = $(this).attr('layuimini-tab-close');
                 $(".layuimini-tab .layui-tab-title li").each(function () {
@@ -370,6 +377,8 @@ layui.define(["element", "layer", "jquery"], function (exports) {
 
             };
             element.on('tab(' + options.filter + ')', function (data) {
+				//拦截请求验证token
+				jwt.isStateHref();
                 var tabId = $(this).attr('lay-id');
                 if (options.urlHashLocation) {
                     location.hash = '/' + tabId;
@@ -398,6 +407,8 @@ layui.define(["element", "layer", "jquery"], function (exports) {
          * @returns {boolean}
          */
         listenHash: function (options) {
+			//拦截请求验证token
+			jwt.isStateHref();
             options.urlHashLocation = options.urlHashLocation || false;
             options.maxTabNum = options.maxTabNum || 20;
             options.homeInfo = options.homeInfo || {};

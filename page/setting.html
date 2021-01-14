@@ -91,7 +91,7 @@
     layui.use(['form'], function () {
         var form = layui.form
             , layer = layui.layer;
-
+			
         //监听提交
         form.on('submit(setting)', function (data) {
             parent.layer.alert(JSON.stringify(data.field), {
@@ -99,7 +99,11 @@
             });
             return false;
         });
-
+		
+		layui.data('jwt', {
+		  key: 'token'
+		  ,remove: true
+		});
     });
 </script>
 </body>
