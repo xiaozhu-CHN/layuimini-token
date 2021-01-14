@@ -16,19 +16,19 @@ layuimini集成jwt实现token
 
 编辑index.html,150行，启用token和输入登录页地址。
 ```javascript
-	var options = {
-            iniUrl: "api/init.json",    // 初始化接口
-            clearUrl: "api/clear.json", // 缓存清理接口
-            urlHashLocation: true,      // 是否打开hash定位
-            bgColorDefault: false,      // 主题默认配置
-            multiModule: true,          // 是否开启多模块
-            menuChildOpen: false,       // 是否默认展开菜单
-            loadingTime: 0,             // 初始化加载时间
-            pageAnim: true,             // iframe窗口动画
-            maxTabNum: 20,              // 最大的tab打开数量
-			token: true,				// 是否启用token
-			login: "page/login-1.html", //登录页面
-        };
+var options = {
+    iniUrl: "api/init.json",    // 初始化接口
+    clearUrl: "api/clear.json", // 缓存清理接口
+    urlHashLocation: true,      // 是否打开hash定位
+    bgColorDefault: false,      // 主题默认配置
+    multiModule: true,          // 是否开启多模块
+    menuChildOpen: false,       // 是否默认展开菜单
+    loadingTime: 0,             // 初始化加载时间
+    pageAnim: true,             // iframe窗口动画
+    maxTabNum: 20,              // 最大的tab打开数量
+    token: true,				// 是否启用token
+    login: "page/login-1.html", //登录页面
+};
 ```
 
 ### 二.使用
