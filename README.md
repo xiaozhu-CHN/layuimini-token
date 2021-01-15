@@ -4,7 +4,7 @@ layuimini集成jwt实现token
 
 本项目是在layuimini项目的基础上增加jwt的token，感觉也挺多人用token的，注意项目只实现了iframe v2版集成token。
 
-拉取代码：`git clone https://github.com/xiaozhu-CHN/layuimini-jwt.git -b v2`
+拉取代码：`git clone https://github.com/xiaozhu-CHN/layuimini-token.git -b v2`
 
 原项目地址：[https://github.com/zhongshaofa/layuimini](https://github.com/zhongshaofa/layuimini)
 
