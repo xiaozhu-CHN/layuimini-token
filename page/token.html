@@ -30,6 +30,7 @@
 		<p id="isstate"></p><br />
 		<br />
 		&nbsp;&nbsp;<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" id="delbtn">清空token</button>
+		<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" id="deljwt">清空jwt表</button>
 	</div>
 </div>
 		
@@ -48,6 +49,14 @@
 			//清空token
 			jwt.delToken();
 			layer.msg('成功清空Token', {icon: 1, time: 1000});
+			//重新加载数据
+			showData();
+		});
+		
+		$("#deljwt").click(function(){
+			//清空token
+			jwt.delData();
+			layer.msg('成功清空jwt表', {icon: 1, time: 1000});
 			//重新加载数据
 			showData();
 		});

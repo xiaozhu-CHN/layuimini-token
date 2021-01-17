@@ -4,7 +4,7 @@
  * version:2.0
  * description:layuimini tab框架扩展
  */
-layui.define(["element", "layer", "jquery", "jwt"], function (exports) {
+layui.define(["element", "layer", "jwt"], function (exports) {
     var element = layui.element,
         layer = layui.layer,
         $ = layui.$,
@@ -46,19 +46,22 @@ layui.define(["element", "layer", "jquery", "jwt"], function (exports) {
             options.title = options.title || null;
             options.isIframe = options.isIframe || false;
             options.maxTabNum = options.maxTabNum || 20;
-            if ($(".layuimini-tab .layui-tab-title li").length >= options.maxTabNum) {
-                layer.msg('Tab窗口已达到限定数量，请先关闭部分Tab');
-                return false;
-            }
-            var ele = element;
-            if (options.isIframe) ele = parent.layui.element;
-            ele.tabAdd('layuiminiTab', {
-                title: '<span class="layuimini-tab-active"></span><span>' + options.title + '</span><i class="layui-icon layui-unselect layui-tab-close">ဆ</i>' //用于演示
-                , content: '<iframe width="100%" height="100%" frameborder="no" border="0" marginwidth="0" marginheight="0"   src="' + options.href + '"></iframe>'
-                , id: options.tabId
-            });
-            $('.layuimini-menu-left').attr('layuimini-tab-tag', 'add');
-            sessionStorage.setItem('layuiminimenu_' + options.tabId, options.title);
+			//拦截请求验证token
+			if(jwt.interceptor(options.tabId)){
+				if ($(".layuimini-tab .layui-tab-title li").length >= options.maxTabNum) {
+				    layer.msg('Tab窗口已达到限定数量，请先关闭部分Tab');
+				    return false;
+				}
+				var ele = element;
+				if (options.isIframe) ele = parent.layui.element;
+				ele.tabAdd('layuiminiTab', {
+				    title: '<span class="layuimini-tab-active"></span><span>' + options.title + '</span><i class="layui-icon layui-unselect layui-tab-close">ဆ</i>' //用于演示
+				    , content: '<iframe width="100%" height="100%" frameborder="no" border="0" marginwidth="0" marginheight="0"   src="' + options.href + '"></iframe>'
+				    , id: options.tabId
+				});
+				$('.layuimini-menu-left').attr('layuimini-tab-tag', 'add');
+				sessionStorage.setItem('layuiminimenu_' + options.tabId, options.title);
+			}
         },
 
 
@@ -205,8 +208,6 @@ layui.define(["element", "layer", "jquery", "jwt"], function (exports) {
              * 打开新窗口
              */
             $('body').on('click', '[layuimini-href]', function () {
-				//拦截请求验证token
-				jwt.isStateHref();
                 var loading = layer.load(0, {shade: false, time: 2 * 1000});
                 var tabId = $(this).attr('layuimini-href'),
                     href = $(this).attr('layuimini-href'),
@@ -245,8 +246,6 @@ layui.define(["element", "layer", "jquery", "jwt"], function (exports) {
              * 在iframe子菜单上打开新窗口
              */
             $('body').on('click', '[layuimini-content-href]', function () {
-				//拦截请求验证token
-				jwt.isStateHref();
                 var loading = parent.layer.load(0, {shade: false, time: 2 * 1000});
                 var tabId = $(this).attr('layuimini-content-href'),
                     href = $(this).attr('layuimini-content-href'),
@@ -289,8 +288,6 @@ layui.define(["element", "layer", "jquery", "jwt"], function (exports) {
              * 选项卡操作
              */
             $('body').on('click', '[layuimini-tab-close]', function () {
-				//拦截请求验证token
-				jwt.isStateHref();
                 var loading = layer.load(0, {shade: false, time: 2 * 1000});
                 var closeType = $(this).attr('layuimini-tab-close');
                 $(".layuimini-tab .layui-tab-title li").each(function () {
@@ -377,8 +374,6 @@ layui.define(["element", "layer", "jquery", "jwt"], function (exports) {
 
             };
             element.on('tab(' + options.filter + ')', function (data) {
-				//拦截请求验证token
-				jwt.isStateHref();
                 var tabId = $(this).attr('lay-id');
                 if (options.urlHashLocation) {
                     location.hash = '/' + tabId;
@@ -407,8 +402,6 @@ layui.define(["element", "layer", "jquery", "jwt"], function (exports) {
          * @returns {boolean}
          */
         listenHash: function (options) {
-			//拦截请求验证token
-			jwt.isStateHref();
             options.urlHashLocation = options.urlHashLocation || false;
             options.maxTabNum = options.maxTabNum || 20;
             options.homeInfo = options.homeInfo || {};

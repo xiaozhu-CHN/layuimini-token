@@ -8,13 +8,15 @@ layuimini集成jwt实现token
 
 原项目地址：[https://github.com/zhongshaofa/layuimini](https://github.com/zhongshaofa/layuimini)
 
+解码jwt项目地址：[https://github.com/auth0/jwt-decode](https://github.com/auth0/jwt-decode)
+
 
 
 ## 使用文档
 
 ### 一.配置
 
-编辑index.html,150行，启用token和输入登录页地址。
+编辑index.html,140行，启用token和输入登录页地址，然后打开index.html，打开该页面的时候会自动进行jwt初始化。
 ```javascript
 var options = {
     iniUrl: "api/init.json",    // 初始化接口
@@ -28,6 +30,11 @@ var options = {
     maxTabNum: 20,              // 最大的tab打开数量
     token: true,				// 是否启用token
     login: "page/login-1.html", //登录页面
+    tokenName: "Authorization", //自动携带 token 的字段名
+    indPage: [
+        'page/login-1.html' //登入页
+        ,'page/404.html' //404页
+    ]							//无需过滤页面
 };
 ```
 
@@ -56,18 +63,15 @@ layui.use(['jquery', 'layer', 'miniAdmin'], function () {
 });
 ```
 
+注意：jwt引入了jQuery模块。
+
 ### 三.jwt方法
-#### 1.decode()
-##### 简要描述
-- 解析jwt的有效载荷
 
-##### 参数
-无需参数
+#### 1.decode(decodeToken)
+解析jwt的有效载荷(PAYLOAD)，decodeToken为可选参数。不传参默认解析setToken()方法保存的token，传参的话就解析decodeToken的有效载荷。
 
-##### 返回值
-返回一个对象。根据你设定的PAYLOAD有啥对象就有啥。
+返回案例：
 
-##### 案例
 ``` 
 {
 	"sub": "1234567890",
@@ -77,78 +81,52 @@ layui.use(['jquery', 'layer', 'miniAdmin'], function () {
 }
 ```
 
-#### 2.isState()
-##### 简要描述
-- 判断当前token是否有效
+#### 2.isState(isStateToken)
 
-##### 参数
-无需参数
+判断token是否有效，isStateToken为可选参数。不传参默认判断setToken()方法保存的token是否生效，传参的话就解析isStateToken是否生效。
 
-##### 返回值
-true或者false。
+主要是判断token是否为伪造和到期时间是否大于当前时间。
 
-|类型|返回值|
-|:----    |:---|
-|token为空 |false |
-|当前时间大于token的到期时间 |false  |
-|token不为空且当前时间小于token的到期时间    |true  |
+返回值为true或者false。
 
-#### 3.isStateHref()
-#### 简要描述
-- 判断当前token是否有效 失效的话跳转登录页面
+#### 3.interceptor(url)
+拦截器方法，token失效且非无需过滤的页面就跳转登录页面，参数url为拦截的url，无需全部地址，只需要hash地址。
 
-##### 参数
-无需参数
+调用案例：
 
-##### 返回值
-true或者直接跳转登录页面
-
-|类型|返回值|
-|:----    |:---|
-|token为空 |直接跳转登录页面 |
-|当前时间大于token的到期时间 |直接跳转登录页面  |
-|token不为空且当前时间小于token的到期时间    |true  |
+`jwt.interceptor('page\welcome-1.html')`
 
 #### 4.getToken()
-#### 简要描述
-- 获取token
-
-##### 参数
-无需参数
-
-##### 返回值
-无返回值
+获取token。
 
 #### 5.setToken(token)
-#### 简要描述
-- 保存token
-
-##### 参数
-token：保存的token
-
-##### 返回值
-无返回值
+保存token。
 
 #### 6.delToken()
-#### 简要描述
-- 删除token
+删除token。
 
-##### 参数
-无需参数
+#### 7.delData()
 
-##### 返回值
-无返回值
+清空缓存(清空jwt的所有data数据)。
+
+#### 8.req(options)
+
+ajax请求，用法同 $.ajax(options)，只不过会在请求头和参数自动放入token。
 
 ### 四.案例
 #### 登录页面保存token。
+
+注意使用jwt.req方法都会自动带上token。
+
 ```javascript
-$.ajax({
+jwt.req({
 	url: login,
 	type: 'get',
-	success(data){
-		if (data != null) {
+    dataType: 'json',
+	success: function (data, textStatus, jqXHR){
+		if (data) {
 			// 保存token
-			jwt.setToken(data);
+			jwt.setToken(data['token']);
 			layer.msg('登录成功', function () {
 				 window.location = '../index.html';
 			});
@@ -156,33 +134,44 @@ $.ajax({
 			layer.msg('登录失败', {icon: 2, time: 1000});
 		}
 	},
-	error(err){
+	error: function(err){
 		layer.msg('服务器错误', {icon: 2, time: 1000});
 	}
 });
 ```
 
-#### Ajax请求带上token
-```javascript
-if(jwt.isStateHref()){
-	//如果token失效就自动登录页
-	$.ajax({
-		url: login,
-		type: 'get',
-		headers: {
-			'Authorization': jwt.getToken()
-		},
-		success(data){
-			if (data != null) {
-				// 数据处理
-			} else {
-				layer.msg('获取数据失败', {icon: 2, time: 1000});
-			}
-		},
-		error(err){
-			layer.msg('服务器错误', {icon: 2, time: 1000});
-		}
-	});
-}
+### 五.问题
 
-```
+注意jwt.req()是基于jQuery Ajax的。返回的token需要带有到期时间，即exp参数。
+
+1. ajax请求头加Token时发生的跨域（CORS）请求问题
+
+   先看后台对OPTIONS类型的请求是否为200，因为ajax修改了请求头是非简单请求，所以请求前会发送一次预检请求(OPTIONS)。放行OPTIONS类型的请求后还需设置响应头。
+
+   以web.py为例：
+
+   ```python
+   # 限制允许跨域访问的源 *为所有源 注意只能设置一个参数
+   web.header("Access-Control-Allow-Origin", "*")
+   # 限制允许跨域访问的http方法类型
+   web.header("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS")
+   # 限制允许跨域访问的http头部
+   web.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+   ```
+
+   
+
+2. ajax获取不到返回头(token)的值
+
+   设置一下Access-Control-Expose-Headers响应头，以web.py为例：
+
+   ```python
+   # 设置自定义的响应头
+   web.header("Access-Control-Expose-Headers", "Authorization")
+   # 放入返回的token
+   web.header("Authorization","XXXXXXXXSSSSSSSSSSSSSSSSSSSSSSSSSXXXXXXXXXX")
+   ```
+
+3. 如何更新token
+
+   建议是每次服务器请求，服务器都更新下token的到期时间，即更新exp时间；然后将token放入响应头，jwt.req()会自动将本地的token更新为响应头的token。

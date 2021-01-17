@@ -122,15 +122,48 @@
 })));
 //# sourceMappingURL=jwt-decode.js.map
 
-layui.define(function(exports) {
+window.rootPath = (function (src) {
+    src = document.scripts[document.scripts.length - 1].src;
+    return src.substring(0, src.lastIndexOf("/") + 1);
+})();
+
+layui.define(["jquery"], function(exports) {
 	var $ = layui.$,
 	    layer = layui.layer;
 	var jwt = {
+		render:function(options){
+			options.login = options.login || 'page/login-1.html';
+			options.tokenName = options.tokenName || 'Authorization';
+			options.indPage = options.indPage || [];
+			
+			//保存是否开启token
+			layui.data('jwt', {
+				key: 'istoken'
+				,value: options.token
+			});
+			if(options.token){
+				//保存login地址
+				layui.data('jwt', {
+					key: 'login'
+					,value: options.login
+				});
+				//保存token 的字段名
+				layui.data('jwt', {
+					key: 'tokenname'
+					,value: options.tokenName
+				});
+				//保存无需过滤页面
+				layui.data('jwt', {
+					key: 'indpage'
+					,value: options.indPage
+				});
+			}
+		},
 		/**
 		 * 解析jwt的有效载荷
 		 */
-		decode: function(){
-			var decodeToken = jwt.getToken();
+		decode: function(decodeToken){
+			decodeToken = decodeToken || jwt.getToken();
 			try{
 				if(token = null){
 					return null;
@@ -144,19 +177,13 @@ layui.define(function(exports) {
 		/**
 		 * 判断当前token是否有效
 		 */
-		isState: function(){
+		isState: function(isStateToken){
 			try{
-				var payload = jwt.decode();
+				var payload = jwt.decode(isStateToken);
 				var time = Date.parse(new Date())/1000;;
 				if(payload != null){
 					if(payload['exp']!=null && payload['exp']>time){
 						return true;
-					}else{
-						// 删除token
-						layui.data('jwt', {
-						  key: 'token'
-						  ,remove: true
-						});
 					}
 				}
 			}catch(err){
@@ -165,36 +192,37 @@ layui.define(function(exports) {
 			return false;
 		},
 		/**
-		 * 判断当前token是否有效 失效的话跳转登录页面
-		 * @param {Object} login 登录页地址
+		 * 拦截器 token失效就跳转登录页面
+		 * @param {Object} url 验证url
 		 */
-		isStateHref: function(login){
-			if(layui.data('jwt').istoken){
-				var decode = jwt.decode();
-				var time = Date.parse(new Date())/1000;
-				login = login || layui.data('jwt').login;
-				if(decode != null){
-					if(decode['exp']>time){
+		interceptor: function(url){
+			//判断是否开启token
+			try{
+				var interceptorjwt = layui.data('jwt');
+				if(interceptorjwt.istoken){
+					//判断是否过滤的页面
+					url = url || '/';
+					var a = interceptorjwt.indpage.indexOf(url);
+					if(a > -1){
 						return true;
 					}else{
-						// 删除token
-						layui.data('jwt', {
-						  key: 'token'
-						  ,remove: true
-						});
-						// 跳转登录页面
-						layer.msg('登录状态失效', {icon: 2, shade: this.shade, scrollbar: false, time: 3000, shadeClose: true}, function(){
-							window.location.href = login;
-						});
-					}
+						//判断token是否有效
+						if(jwt.isState()){
+							return true;
+						}else{
+							var jwtbase = layui.cache.base;
+							// 跳转登录页面
+							layer.msg('未登录或登录状态失效', {icon: 2, shade: this.shade, scrollbar: false, time: 2000, shadeClose: true}, function(){
+								window.location.href = jwtbase.substring(0,jwtbase.length-14)+interceptorjwt.login;
+							});
+						}
+					}	
 				}else{
-					// 跳转登录页面
-					layer.msg('请先登录', {icon: 2, shade: this.shade, scrollbar: false, time: 3000, shadeClose: true}, function(){
-						window.location.href = login;
-					});
+					return true;
 				}
+			}catch(err){
+				return false;
 			}
-			
 		},
 		/**
 		 * 获取token
@@ -222,6 +250,76 @@ layui.define(function(exports) {
 			  key: 'token'
 			  ,remove: true
 			});
+		},
+		/**
+		 * 清空缓存(清空jwt的所有data数据)
+		 */
+		delData: function(){
+			layui.data('jwt', null);
+		},
+		/**
+		 * ajax请求
+		 * @param {Object} options ajax请求参数
+		 */
+		req: function(options){
+			var that = this
+			,success = options.success
+			,error = options.error
+			,tokenName = layui.data('jwt').tokenname;
+			
+			//判断是否开启token
+			if(layui.data('jwt').istoken){
+				options.data = options.data || {};
+				options.headers = options.headers || {};
+				
+				//放入token参数
+				if(tokenName){
+				  //自动给参数传入默认 token
+				  options.data[tokenName] = tokenName in options.data 
+				    ?  options.data[tokenName]
+				  : (layui.data('jwt').token || '');
+				  
+				  //判断传入的headers是否有token，有的话就不自动加入
+				  options.headers[tokenName] = tokenName in options.headers 
+				    ?  options.headers[tokenName]
+				  : (layui.data('jwt').token || '');
+				}
+				
+				delete options.success;
+				delete options.error;
+				
+				return $.ajax($.extend({
+				  type: 'get'
+				  ,dataType: 'json'
+				  ,success: function(res, textStatus, jqXHR){
+					// getAllResponseHeaders  getResponseHeader
+					//状态码为401 未授权的时候
+					if(jqXHR.status == 401){
+						 //清空token
+						jwt.delToken();
+						//拦截器鉴权
+						jwt.interceptor()
+						layui.hint().error('请求异常，没有权限');
+					}else{
+						//如果有返回token就更新
+						if(jqXHR.getResponseHeader(tokenName)){
+							//判断token是否有效 有效的话就保存
+							if(jwt.isState(jqXHR.getResponseHeader(tokenName))){
+								jwt.setToken(jqXHR.getResponseHeader(tokenName));
+							}
+						}
+						//执行success代码
+						typeof success === 'function' && success(res, textStatus, jqXHR);
+					}
+				  }
+				  ,error: function(exhr,estatus,e){
+				    layui.hint().error(e);
+				    typeof error === 'function' && error(exhr,estatus,e);
+				  }
+				}, options));
+			}else{
+				return $.ajax(options);
+			}
 		}
 	};
     exports('jwt', jwt);

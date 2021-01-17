@@ -100,15 +100,33 @@
                 layer.msg('验证码不能为空');
                 return false;
             }
-            layer.msg('登录成功', function () {
-				//开启token才给token
-				if(layui.data('jwt').istoken){
-					var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE3MTA1NTM1ODZ9.1GHEymwC2S3MALuaPJuwNJo3vFHwOO7Dx4Y3uZ_aoFo";
-					jwt.setToken(token);
-				}
-				//保存token的值
-                window.location = '../index.html';
-            });
+            //是否开启token
+            if(layui.data('jwt').istoken){
+            	jwt.req({
+            		//
+            		url: '../api/login.json',
+            		type: 'get',
+            		dataType: 'json',
+            		success:function (data, textStatus, jqXHR){
+            			if (data) {
+            				// 保存token
+            				jwt.setToken(data['token']);
+            				layer.msg('登录成功', function () {
+            					 window.location = '../index.html';
+            				});
+            			} else {
+            				layer.msg('登录失败', {icon: 2, time: 1000});
+            			}
+            		},
+            		error:function(err){
+            			layer.msg('服务器错误', {icon: 2, time: 1000});
+            		}
+            	});
+            }else{
+            	//清空jwt表数据
+            	jwt.delData();
+            	 window.location = '../index.html';
+            }
             return false;
         });
     });

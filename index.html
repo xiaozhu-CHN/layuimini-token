@@ -149,6 +149,11 @@
             maxTabNum: 20,              // 最大的tab打开数量
 			token: true,				// 是否启用token
 			login: "page/login-1.html", //登录页面
+			tokenName: "Authorization", //自动携带 token 的字段名
+			indPage: [
+			  'page/login-1.html' //登入页
+			  ,'page/404.html' //404页
+			]							//无需过滤页面
         };
         miniAdmin.render(options);
 

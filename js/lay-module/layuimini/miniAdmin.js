@@ -43,26 +43,16 @@ layui.define(["jquery", "miniMenu", "element","miniTab", "miniTheme"], function 
             options.pageAnim = options.pageAnim || false;
             options.maxTabNum = options.maxTabNum || 20;
 			options.token = options.token || false;
-			options.login = options.login || 'page/login-1.html';
-			//保存是否开启token
-			layui.data('jwt', {
-				key: 'istoken'
-				,value: options.token
-			});
+			
+			//是否开启token
 			if(options.token){
-				//保存login地址
-				layui.data('jwt', {
-					key: 'login'
-					,value: options.login
-				});
+				//jwt模块初始化
+				jwt.render(options);
 				// 判断token是否有效
-				if(jwt.isStateHref(options.login)){
-					$.ajax({
+				if(jwt.interceptor("index.html")){
+					jwt.req({
 						url: options.iniUrl,
 						type: 'get',
-						headers: {
-							'Authorization': jwt.getToken()
-						},
 						success(data){
 							if (data == null) {
 								miniAdmin.error('暂无菜单信息')
