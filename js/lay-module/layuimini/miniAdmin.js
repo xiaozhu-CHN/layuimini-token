@@ -288,17 +288,41 @@ layui.define(["miniMenu", "element","miniPage", "miniTheme"], function (exports)
                 // 判断是否清理服务端
                 var clearUrl = $(this).attr('data-href');
                 if (clearUrl != undefined && clearUrl != '' && clearUrl != null) {
-                    $.getJSON(clearUrl, function (data, status) {
-                        layer.close(loading);
-                        if (data.code != 1) {
-                            return miniAdmin.error(data.msg);
-                        } else {
-                            return miniAdmin.success(data.msg);
-                        }
-                    }).fail(function () {
-                        layer.close(loading);
-                        return miniAdmin.error('清理缓存接口有误');
-                    });
+					//是否开启token
+					if(layui.data('jwt').istoken){
+						// 判断token是否有效
+						if(jwt.interceptor(clearUrl)){
+							jwt.req({
+								url: clearUrl,
+								type: 'get',
+								dataType: 'json',
+								success(data){
+									layer.close(loading);
+									if (data.code != 1) {
+									    return miniAdmin.error(data.msg);
+									} else {
+									    return miniAdmin.success(data.msg);
+									}
+								},
+								error(err){
+									layer.close(loading);
+									return miniAdmin.error('清理缓存接口有误');
+								}
+							});
+						}
+					}else{
+						$.getJSON(clearUrl, function (data, status) {
+						    layer.close(loading);
+						    if (data.code != 1) {
+						        return miniAdmin.error(data.msg);
+						    } else {
+						        return miniAdmin.success(data.msg);
+						    }
+						}).fail(function () {
+						    layer.close(loading);
+						    return miniAdmin.error('清理缓存接口有误');
+						});
+					}
                 } else {
                     layer.close(loading);
                     return miniAdmin.success('清除缓存成功');
