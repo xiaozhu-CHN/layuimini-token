@@ -66,11 +66,13 @@
 </div>
 <script src="../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
 <script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
 <script src="../lib/jq-module/jquery.particleground.min.js" charset="utf-8"></script>
 <script>
-    layui.use(['form'], function () {
+    layui.use(['form','jwt'], function () {
         var form = layui.form,
-            layer = layui.layer;
+            layer = layui.layer,
+			jwt = layui.jwt;
 
         // 登录过期的时候，跳出ifram框架
         if (top.location != self.location) top.location = self.location;
@@ -98,10 +100,34 @@
                 layer.msg('验证码不能为空');
                 return false;
             }
-            layer.msg('登录成功', function () {
-                window.location = '../index.html';
-            });
-            return false;
+			//是否开启token
+			if(layui.data('jwt').istoken){
+				//jwt.req()登录请求 用法和Ajax一样 只不过会自动带上token 其实登录用普通Ajax就行
+				jwt.req({
+					url: '../api/login.json',
+					type: 'get',
+					dataType: 'json',
+					success:function (data, textStatus, jqXHR){
+						if (data) {
+							// 保存token
+							jwt.setToken(data['token']);
+							layer.msg('登录成功', function () {
+								 window.location = '../index.html';
+							});
+						} else {
+							layer.msg('登录失败', {icon: 2, time: 1000});
+						}
+					},
+					error:function(err){
+						layer.msg('服务器错误', {icon: 2, time: 1000});
+					}
+				});
+			}else{
+				//清空jwt表数据
+				jwt.delData();
+				 window.location = '../index.html';
+			}
+			return false;
         });
     });
 </script>

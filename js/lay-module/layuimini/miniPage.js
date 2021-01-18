@@ -4,11 +4,12 @@
  * version:2.0
  * description:layuimini 单页框架扩展
  */
-layui.define(["element", "jquery"], function (exports) {
+layui.define(["element", "jwt"], function (exports) {
     var element = layui.element,
         $ = layui.$,
         // miniAdmin = layui.miniAdmin,
-        layer = layui.layer;
+        layer = layui.layer,
+		jwt = layui.jwt;
 
 
     var miniPage = {
@@ -99,30 +100,33 @@ layui.define(["element", "jquery"], function (exports) {
          * @param href
          */
         renderPageContent: function (href, options) {
-            options.renderPageVersion = options.renderPageVersion || false;
-            var container = '.layuimini-content-page';
-            if (options.renderPageVersion) {
-                var v = new Date().getTime();
-                href = href.indexOf("?") > -1 ? href + '&v=' + v : href + '?v=' + v;
-            }
-            if ($(".layuimini-page-header").hasClass("layui-hide")) {
-                $(container).removeAttr("style");
-            } else {
-                $(container).attr("style", "height: calc(100% - 36px)");
-            }
-            $(container).html('');
-            $.ajax({
-                url: href,
-                type: 'get',
-                dataType: 'html',
-                success: function (data) {
-                    $(container).html(data);
-                    element.init();
-                },
-                error: function (xhr, textstatus, thrown) {
-                    return layer.msg('Status:' + xhr.status + '，' + xhr.statusText + '，请稍后再试！');
-                }
-            });
+			//拦截请求验证token
+			if(jwt.interceptor(href)){
+				options.renderPageVersion = options.renderPageVersion || false;
+				var container = '.layuimini-content-page';
+				if (options.renderPageVersion) {
+				    var v = new Date().getTime();
+				    href = href.indexOf("?") > -1 ? href + '&v=' + v : href + '?v=' + v;
+				}
+				if ($(".layuimini-page-header").hasClass("layui-hide")) {
+				    $(container).removeAttr("style");
+				} else {
+				    $(container).attr("style", "height: calc(100% - 36px)");
+				}
+				$(container).html('');
+				$.ajax({
+				    url: href,
+				    type: 'get',
+				    dataType: 'html',
+				    success: function (data) {
+				        $(container).html(data);
+				        element.init();
+				    },
+				    error: function (xhr, textstatus, thrown) {
+				        return layer.msg('Status:' + xhr.status + '，' + xhr.statusText + '，请稍后再试！');
+				    }
+				});
+			}
         },
 
         /**

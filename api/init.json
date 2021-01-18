@@ -15,6 +15,12 @@
       "href": "",
       "target": "_self",
       "child": [
+		{
+		  "title": "token",
+		  "href": "page/token.html",
+		  "icon": "fa fa-shield",
+		  "target": "_self"
+		},
         {
           "title": "主页模板",
           "href": "",

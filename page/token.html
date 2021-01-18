@@ -1,0 +1,69 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+            <legend>当前token</legend>
+        </fieldset>
+		<h3>当前token：</h3>
+		<p id="token"></p><br />
+		<h3>有效载荷：</h3>
+		<p id="payload"></p><br />
+		<h3>token校验(主要看是是否为空和过期)：</h3>
+		<p id="isstate"></p><br />
+		<br />
+		&nbsp;&nbsp;<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" id="delbtn">清空token</button>
+		<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" id="deljwt">清空jwt表</button>
+	</div>
+</div>
+		
+<!-- <script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=2.0.0" charset="utf-8"></script> -->
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    layui.use(["jquery", "jwt", 'layer'], function () {
+        var $ = layui.$,
+			layer = layui.layer,
+            jwt = layui.jwt;
+			
+		showData();
+		
+		$("#delbtn").click(function(){
+			//清空token
+			jwt.delToken();
+			layer.msg('成功清空Token', {icon: 1, time: 1000});
+			//重新加载数据
+			showData();
+		});
+		
+		$("#deljwt").click(function(){
+			//清空token
+			jwt.delData();
+			layer.msg('成功清空jwt表', {icon: 1, time: 1000});
+			//重新加载数据
+			showData();
+		});
+		
+		//显示页面数据
+		function showData(){
+			if(jwt.getToken()){
+				$("#token").html(jwt.getToken());
+			}else{
+				$("#token").html("当前token为空");
+			}
+			if(jwt.decode()){
+				const obj = jwt.decode();
+				var html = "{";
+				for(let key  in obj){
+					html+=key+":"+obj[key]+","
+				}
+				html = html.substring(0,html.length-1);
+				html += "}";
+				$("#payload").html(html);
+			}else{
+				$("#payload").html("当前payload为空");
+			}
+			$("#isstate").html(jwt.isState().toString());
+		}
+        
+
+    });
+</script>
