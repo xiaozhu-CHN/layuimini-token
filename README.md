@@ -2,13 +2,17 @@ layuimini集成jwt实现token
 ===============
 ## 介绍
 
-本项目是在layuimini项目的基础上增加jwt的token，感觉也挺多人用token的，注意项目只实现了iframe v2版集成token。
-
-拉取代码：`git clone https://github.com/xiaozhu-CHN/layuimini-token.git -b v2`
+本项目是在layuimini项目的基础上增加jwt的token，感觉也挺多人用token的，~~注意项目只实现了iframe v2版集成token~~。
 
 原项目地址：[https://github.com/zhongshaofa/layuimini](https://github.com/zhongshaofa/layuimini)
 
 解码jwt项目地址：[https://github.com/auth0/jwt-decode](https://github.com/auth0/jwt-decode)
+
+### 拉取代码：
+
+iframe v2多tab版：`git clone https://github.com/xiaozhu-CHN/layuimini-token -b v2`
+
+onepage v2单页版：`git clone https://github.com/xiaozhu-CHN/layuimini-token -b v2-onepage`
 
 
 
@@ -175,3 +179,7 @@ jwt.req({
 3. 如何更新token
 
    建议是每次服务器请求，服务器都更新下token的到期时间，即更新exp时间；然后将token放入响应头，jwt.req()会自动将本地的token更新为响应头的token。
+
+4. 服务器如何清空前端token
+
+   可以手动通过通过delToken()方法清空；当通过jwt.req()请求服务器时，服务器返回401响应码会自动清空token并转跳到登录页。

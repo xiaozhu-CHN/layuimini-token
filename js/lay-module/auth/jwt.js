@@ -273,16 +273,16 @@ layui.define(["jquery"], function(exports) {
 				options.headers = options.headers || {};
 				
 				//放入token参数
-				if(tokenName){
+				if(tokenName && jwt.getToken()){
 				  //自动给参数传入默认 token
 				  options.data[tokenName] = tokenName in options.data 
 				    ?  options.data[tokenName]
-				  : (layui.data('jwt').token || '');
+				  : (jwt.getToken() || '');
 				  
 				  //判断传入的headers是否有token，有的话就不自动加入
 				  options.headers[tokenName] = tokenName in options.headers 
 				    ?  options.headers[tokenName]
-				  : (layui.data('jwt').token || '');
+				  : (jwt.getToken() || '');
 				}
 				
 				delete options.success;

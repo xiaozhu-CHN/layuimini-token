@@ -103,7 +103,7 @@
             //是否开启token
             if(layui.data('jwt').istoken){
             	jwt.req({
-            		//
+            		//jwt.req()登录请求 用法和Ajax一样 只不过会自动带上token 其实登录用普通Ajax就行
             		url: '../api/login.json',
             		type: 'get',
             		dataType: 'json',
