@@ -313,6 +313,13 @@ layui.define(["jquery"], function(exports) {
 					}
 				  }
 				  ,error: function(exhr,estatus,e){
+					if (exhr.status == 401) {
+						//清空token
+						jwt.delToken();
+						//拦截器鉴权
+						jwt.interceptor()
+						layui.hint().error('请求异常，没有权限');
+					}
 				    layui.hint().error(e);
 				    typeof error === 'function' && error(exhr,estatus,e);
 				  }
