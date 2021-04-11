@@ -136,6 +136,7 @@ layui.define(["jquery"], function(exports) {
 			options.login = options.login || 'page/login-1.html';
 			options.tokenName = options.tokenName || 'Authorization';
 			options.indPage = options.indPage || [];
+			options.serviceUrl = options.serviceUrl || 'http://127.0.0.1:80/';
 
 			//保存是否开启token
 			layui.data('jwt', {
@@ -157,6 +158,10 @@ layui.define(["jquery"], function(exports) {
 				layui.data('jwt', {
 					key: 'indpage',
 					value: options.indPage
+				});
+				layui.data('jwt', {
+					key: 'serviceurl',
+					value: options.serviceUrl
 				});
 			}
 		},
@@ -236,6 +241,26 @@ layui.define(["jquery"], function(exports) {
 		 */
 		getToken: function() {
 			return layui.data('jwt').token;
+		},
+		/**
+		 * 获取后台URL开头
+		 */
+		getUrl: function() {
+			return layui.data('jwt').serviceurl;
+		},
+		/**
+		 * 获取 token 的字段名
+		 */
+		getTokenName: function() {
+			return layui.data('jwt').tokenname;
+		},
+		/**
+		 * layuitable获取token标签对
+		 */
+		getTabelToken: function() {
+			let tokenTable = {};
+			tokenTable[jwt.getTokenName()] = jwt.getToken();
+			return tokenTable;
 		},
 		/**
 		 * 保存token
