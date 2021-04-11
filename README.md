@@ -20,7 +20,7 @@ onepage v2单页版：`git clone https://github.com/xiaozhu-CHN/layuimini-token 
 
 ### 一.配置
 
-编辑index.html,140行，启用token和输入登录页地址，然后打开index.html，打开该页面的时候会自动进行jwt初始化。
+编辑index.html,150行，启用token和输入登录页地址，然后打开index.html，打开该页面的时候会自动进行jwt初始化。
 ```javascript
 var options = {
     iniUrl: "api/init.json",    // 初始化接口
@@ -35,6 +35,7 @@ var options = {
     token: true,				// 是否启用token
     login: "page/login-1.html", //登录页面
     tokenName: "Authorization", //自动携带 token 的字段名
+	serviceUrl: "http://127.0.0.1:80/", //后台URL开头
     indPage: [
         'page/login-1.html' //登入页
         ,'page/404.html' //404页
@@ -117,6 +118,18 @@ layui.use(['jquery', 'layer', 'miniAdmin'], function () {
 
 ajax请求，用法同 $.ajax(options)，只不过会在请求头和参数自动放入token。
 
+#### 9.getUrl()
+
+获取自定义的后台url，在index.html页面传入保存，方便接口链接的修改。
+
+#### 10.getTokenName()
+
+获取设置的token字段名称。
+
+#### 11.getTabelToken()
+
+获取token的名称和token值，方便LayuiTable模块传递token，使用详见案例。
+
 ### 四.案例
 #### 登录页面保存token。
 
@@ -143,6 +156,46 @@ jwt.req({
 	}
 });
 ```
+
+#### LayuiTable传递token。
+
+```javascript
+		var jwt = layui.jwt,
+			table = layui.table;
+		var apiTable = table.render({
+			elem: '#currentTableId',
+			url: jwt.getUrl() + 'admin/tsetapi',
+			headers: jwt.getTabelToken(),
+			toolbar: '#toolbar',
+			title: 'APITEST表',
+			cols: [
+				[{
+					field: 'id',
+					title: 'ID',
+					width: '30%',
+					fixed: 'left',
+					unresize: true,
+					sort: true,
+					align: 'center'
+				}, {
+					field: 'token',
+					title: 'Token',
+					width: '30%',
+					align: 'center'
+				}, {
+					field: 'tset',
+					title: 'test',
+					width: '40%',
+					edit: 'text',
+					align: 'center'
+				}]
+			],
+			page: true,
+			even: true
+		});
+```
+
+
 
 ### 五.问题
 
